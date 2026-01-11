@@ -67,7 +67,7 @@ export function ChartView() {
     };
 
     embedChart();
-  }, [spec, state.data, state.encodings]);
+  }, [spec]);
 
   const hasEncodings = Object.keys(state.encodings).length > 0;
 
