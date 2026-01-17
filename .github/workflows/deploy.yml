@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [touchscreen-compatibility]
 
 permissions:
   contents: write
