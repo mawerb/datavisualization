@@ -22,11 +22,12 @@ interface EncodingShelfProps {
 }
 
 export function EncodingShelf({ channel, label }: EncodingShelfProps) {
-  const { state, assignField, removeField } = useApp();
+  const { state, assignField, removeField, clearSelectedField } = useApp();
   const [isOver, setIsOver] = useState(false);
   const [isHoveredRemove, setIsHoveredRemove] = useState(false);
 
   const assignedField = state.encodings[channel];
+  const isTargetMode = Boolean(state.selectedField);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -54,6 +55,14 @@ export function EncodingShelf({ channel, label }: EncodingShelfProps) {
   };
 
   const color = assignedField ? TYPE_COLORS[assignedField.type] : 'var(--color-accent)';
+
+  const handleClick = () => {
+    // When a field is selected (touch flow), tapping a shelf assigns it here
+    if (state.selectedField) {
+      assignField(channel, state.selectedField);
+      clearSelectedField();
+    }
+  };
 
   return (
     <div>
@@ -88,23 +97,30 @@ export function EncodingShelf({ channel, label }: EncodingShelfProps) {
 
       {/* Drop zone */}
       <div
+        onClick={handleClick}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         style={{
           minHeight: '44px',
           padding: assignedField ? '6px' : '12px',
-          backgroundColor: isOver
-            ? 'var(--color-accent-glow)'
-            : assignedField
-              ? 'var(--color-bg-tertiary)'
-              : 'var(--color-bg-elevated)',
-          border: `1px ${isOver ? 'solid' : 'dashed'} ${
-            isOver
-              ? 'var(--color-accent)'
+          backgroundColor: isTargetMode
+            ? 'rgba(239, 68, 68, 0.08)'
+            : isOver
+              ? 'var(--color-accent-glow)'
               : assignedField
-                ? 'var(--color-border)'
-                : 'var(--color-border)'
+                ? 'var(--color-bg-tertiary)'
+                : 'var(--color-bg-elevated)',
+          border: `1px ${
+            isOver || isTargetMode ? 'solid' : 'dashed'
+          } ${
+            isTargetMode
+              ? '#ef4444'
+              : isOver
+                ? 'var(--color-accent)'
+                : assignedField
+                  ? 'var(--color-border)'
+                  : 'var(--color-border)'
           }`,
           borderRadius: '8px',
           transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',

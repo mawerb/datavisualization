@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { DetectedField, FieldType } from '../../types';
 import { useApp } from '../../context/AppContext';
 
@@ -22,11 +22,33 @@ interface FieldPillProps {
 }
 
 export function FieldPill({ field, index }: FieldPillProps) {
-  const { toggleFieldType } = useApp();
+  const { toggleFieldType, state, selectField, clearSelectedField } = useApp();
   const [isHovered, setIsHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const lastPointerTypeRef = useRef<'mouse' | 'pen' | 'touch' | 'unknown'>('unknown');
+
+  const isSelected = state.selectedField?.name === field.name;
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    lastPointerTypeRef.current =
+      e.pointerType === 'mouse' || e.pointerType === 'pen' || e.pointerType === 'touch'
+        ? e.pointerType
+        : 'unknown';
+  };
+
+  const handleClick = () => {
+    if (lastPointerTypeRef.current === 'touch') {
+      // Toggle selection for touch interaction
+      if (isSelected) {
+        clearSelectedField();
+      } else {
+        selectField(field);
+      }
+    }
+  };
 
   const handleDragStart = (e: React.DragEvent) => {
+    // Preserve drag-and-drop for mouse/desktop
     e.dataTransfer.setData('application/json', JSON.stringify(field));
     e.dataTransfer.effectAllowed = 'copy';
     setIsDragging(true);
@@ -43,6 +65,8 @@ export function FieldPill({ field, index }: FieldPillProps) {
     <div
       className="field-pill"
       draggable
+      onPointerDown={handlePointerDown}
+      onClick={handleClick}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onMouseEnter={() => setIsHovered(true)}
@@ -52,10 +76,18 @@ export function FieldPill({ field, index }: FieldPillProps) {
         alignItems: 'center',
         gap: '10px',
         padding: '10px 14px',
-        backgroundColor: isHovered
-          ? 'var(--color-bg-tertiary)'
-          : 'var(--color-bg-elevated)',
-        border: `1px solid ${isHovered ? 'var(--color-border-hover)' : 'var(--color-border)'}`,
+        backgroundColor: isSelected
+          ? 'var(--color-accent-glow)'
+          : isHovered
+            ? 'var(--color-bg-tertiary)'
+            : 'var(--color-bg-elevated)',
+        border: `1px solid ${
+          isSelected
+            ? 'var(--color-accent)'
+            : isHovered
+              ? 'var(--color-border-hover)'
+              : 'var(--color-border)'
+        }`,
         borderRadius: '8px',
         cursor: isDragging ? 'grabbing' : 'grab',
         fontSize: '13px',

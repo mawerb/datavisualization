@@ -9,6 +9,7 @@ const initialState: AppState = {
   encodings: {},
   isLoading: true,
   error: null,
+  selectedField: null,
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
@@ -28,11 +29,15 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, encodings: newEncodings };
     }
     case 'CLEAR_ALL':
-      return { ...state, encodings: {} };
+      return { ...state, encodings: {}, selectedField: null };
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
     case 'SET_ERROR':
       return { ...state, error: action.payload, isLoading: false };
+    case 'SET_SELECTED_FIELD':
+      return { ...state, selectedField: action.field };
+    case 'CLEAR_SELECTED_FIELD':
+      return { ...state, selectedField: null };
     case 'TOGGLE_FIELD_TYPE': {
       const newFields = state.fields.map((field) => {
         if (field.name === action.fieldName) {
@@ -63,6 +68,8 @@ interface AppContextType {
   removeField: (channel: EncodingChannel) => void;
   clearAll: () => void;
   toggleFieldType: (fieldName: string) => void;
+  selectField: (field: DetectedField | null) => void;
+  clearSelectedField: () => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -98,8 +105,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'TOGGLE_FIELD_TYPE', fieldName });
   };
 
+  const selectField = (field: DetectedField | null) => {
+    dispatch({ type: 'SET_SELECTED_FIELD', field });
+  };
+
+  const clearSelectedField = () => {
+    dispatch({ type: 'CLEAR_SELECTED_FIELD' });
+  };
+
   return (
-    <AppContext.Provider value={{ state, assignField, removeField, clearAll, toggleFieldType }}>
+    <AppContext.Provider
+      value={{ state, assignField, removeField, clearAll, toggleFieldType, selectField, clearSelectedField }}
+    >
       {children}
     </AppContext.Provider>
   );

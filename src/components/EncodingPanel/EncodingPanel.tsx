@@ -54,10 +54,11 @@ const SECTIONS: EncodingSection[] = [
 ];
 
 export function EncodingPanel() {
-  const { clearAll, state } = useApp();
+  const { clearAll, state, clearSelectedField } = useApp();
   const [hoveredClear, setHoveredClear] = useState(false);
 
   const hasEncodings = Object.keys(state.encodings).length > 0;
+  const hasSelection = Boolean(state.selectedField);
 
   return (
     <aside
@@ -191,7 +192,7 @@ export function EncodingPanel() {
         ))}
       </div>
 
-      {/* Status indicator */}
+      {/* Status / selection indicator */}
       <div
         style={{
           marginTop: '24px',
@@ -199,34 +200,78 @@ export function EncodingPanel() {
           borderTop: '1px solid var(--color-border)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'space-between',
           gap: '8px',
         }}
       >
-        <span
+        <div
           style={{
-            width: '6px',
-            height: '6px',
-            borderRadius: '50%',
-            backgroundColor: hasEncodings
-              ? 'var(--color-temporal)'
-              : 'var(--color-text-muted)',
-            boxShadow: hasEncodings ? '0 0 8px var(--color-temporal)' : 'none',
-            transition: 'all 0.3s ease',
-          }}
-        />
-        <span
-          style={{
-            fontSize: '10px',
-            color: 'var(--color-text-muted)',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
           }}
         >
-          {hasEncodings
-            ? `${Object.keys(state.encodings).length} active`
-            : 'No encodings'}
-        </span>
+          <span
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              backgroundColor: hasEncodings
+                ? 'var(--color-temporal)'
+                : 'var(--color-text-muted)',
+              boxShadow: hasEncodings ? '0 0 8px var(--color-temporal)' : 'none',
+              transition: 'all 0.3s ease',
+            }}
+          />
+          <span
+            style={{
+              fontSize: '10px',
+              color: 'var(--color-text-muted)',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {hasEncodings
+              ? `${Object.keys(state.encodings).length} active`
+              : 'No encodings'}
+          </span>
+        </div>
+
+        {hasSelection && state.selectedField && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '10px',
+                color: 'var(--color-text-secondary)',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Tap a channel to place "{state.selectedField.name}"
+            </span>
+            <button
+              type="button"
+              onClick={clearSelectedField}
+              style={{
+                fontSize: '10px',
+                padding: '4px 8px',
+                borderRadius: '999px',
+                border: '1px solid var(--color-border)',
+                backgroundColor: 'transparent',
+                color: 'var(--color-text-muted)',
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );
